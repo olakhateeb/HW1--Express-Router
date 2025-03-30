@@ -1,73 +1,81 @@
 const express = require("express");
 const router = express.Router();
 const data = require("../data");
+const path = require("path");
 
-// Get /api/products
+// GET /api/products
 router.get("/", (req, res) => {
-  res.json(data.products);
+  res.json({ products: data.products });
 });
 
-// Get /api/products/:id
+// GET /api/products/:id
+//get product by id (path param)
 router.get("/:id", (req, res) => {
   const { id } = req.params;
   const product = data.products.find((item) => item.id === parseInt(id));
   if (product) res.json(product);
-  else res.status(404).json({ message: `Product with ID: ${id} not found` });
+  else res.status(404).json({ message: `product with ID: ${id} not found` });
 });
 
 // POST /api/products
+//add product (body data)
 router.post("/", (req, res) => {
-  const { name, price } = req.body;
-  if (name == null || price == null) {
-    return res.status(400).json({ message: `Must have name and price` });
-  }
-  
-  const newProduct = { id: data.products.length + 1, name, price };
-  data.products.push(newProduct);
-  res
-    .status(201)
-    .json({ message: `Product added successfully`, product: newProduct });
+  const productData = req.body;
+  const sameProduct = data.products.find(
+    (product) => product.id === productData.id
+  );
+  if (!sameProduct && productData.name !== null && productData.price !== null) {
+    if (productData.price > 0 && productData.stock > 0) {
+      data.products.push(productData);
+      res.json({ message: `product added`, products: data.products });
+    }
+  } else
+    res
+      .status(404)
+      .json({ message: "missing name or price or product already exist" });
 });
 
-// PUT /api/products/:id
+// PUT /api/users/:id
+//update user by id (path param + body data)
 router.put("/:id", (req, res) => {
   const { id } = req.params;
   const productData = req.body;
-  const productIndex = data.products.findIndex(
+  //find index of user by id into array
+  const productInd = data.products.findIndex(
     (item) => item.id === parseInt(id)
   );
 
-  if (productIndex !== -1) {
-    if (productData.name == null && productData.price == null) {
-      return res.status(400).json({
-        message: `At least one field (name or price) must be provided`,
+  if (productInd !== -1) {
+    //change user into array
+    if (productData.price > 0 && productData.stock > 0) {
+      data.products[productInd] = productData;
+      res.json({
+        message: `product with ID: ${id} updated`,
+        products: data.products,
       });
     }
-    data.products[productIndex] = {
-      ...data.products[productIndex],
-      ...productData,
-    };
-    res.json({
-      message: `Product with ID: ${id} updated`,
-      products: data.products,
-    });
   } else {
-    res.status(404).json({ message: `Product not found` });
+    res.status(404).json({ message: `product not found` });
   }
 });
 
-// DELETE /api/products/:id
+// DELETE /api/users
+//delete user by id
 router.delete("/:id", (req, res) => {
   const { id } = req.params;
-  const productIndex = data.products.findIndex(
+  const productInd = data.products.findIndex(
     (item) => item.id === parseInt(id)
   );
 
-  if (productIndex !== -1) {
-    data.products.splice(productIndex, 1);
-    res.json({ message: `Product with ID: ${id} deleted` });
+  if (productInd !== -1) {
+    //delete user into array
+    data.products.splice(productInd, 1);
+    res.json({
+      message: `User with ID: ${id} deleted`,
+      products: data.products,
+    });
   } else {
-    res.status(404).json({ message: `Product not found` });
+    res.status(404).json({ message: `product not found` });
   }
 });
 
