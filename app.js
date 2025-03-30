@@ -1,3 +1,5 @@
+//עלי חנפי+עולא חטיב
+
 const express = require("express");
 const app = express();
 const userRoutes = require("./routes/users");
@@ -10,8 +12,8 @@ app.use(express.json());
 app.use(express.static("public"));
 
 // Routers
-// app.use("/api/users", userRoutes); // All user routes
-app.use("/api/products", productsRoutes); // All products routes
+app.use("/api/users", userRoutes); // All user routes
+app.use("/api/products", productsRoutes); // All user products
 
 // Main Page
 app.get("/", (req, res) => {
